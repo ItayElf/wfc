@@ -4,8 +4,20 @@ use rand::seq::SliceRandom;
 
 type WfcVector = Vec<HashSet<String>>;
 
+/// Returns valid neighbor indexes
+fn get_valid_neighbors(index: usize, max_length: usize) -> impl Iterator<Item = usize> {
+    let mut result = Vec::<usize>::new();
+    if index > 0 {
+        result.push(index - 1);
+    }
+    if (index < max_length - 1) {
+        result.push(index + 1);
+    }
+    result.into_iter()
+}
+
 /// Returns wether the vector is collapsed
-pub fn is_collapsed(wfc_vector: &WfcVector) -> bool {
+fn is_collapsed(wfc_vector: &WfcVector) -> bool {
     for set in wfc_vector {
         if set.len() != 1 {
             return false;
@@ -35,7 +47,7 @@ fn collapse_at(wfc_vector: &mut WfcVector, index: usize) -> Result<String, &'sta
 }
 
 /// Converts a WfcVector to a vector of strings.
-pub fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static str> {
+fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static str> {
     let mut result = Vec::<String>::new();
 
     for set in wfc_vector {
@@ -50,9 +62,25 @@ pub fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static
 
 #[cfg(test)]
 mod tests {
-    use crate::wfc::wfc::algorithm::{collapse_at, is_collapsed};
+    use crate::wfc::wfc::algorithm::{collapse_at, get_valid_neighbors, is_collapsed};
 
     use super::{flatten_wfc_vector, WfcVector};
+
+    #[test]
+    fn test_get_valid_neighbors_sanity() {
+        assert_eq!(
+            get_valid_neighbors(2, 100).into_iter().collect::<Vec<_>>(),
+            vec![1, 3]
+        );
+        assert_eq!(
+            get_valid_neighbors(0, 100).into_iter().collect::<Vec<_>>(),
+            vec![1]
+        );
+        assert_eq!(
+            get_valid_neighbors(1, 2).into_iter().collect::<Vec<_>>(),
+            vec![0]
+        );
+    }
 
     #[test]
     fn test_is_collapsed_sanity() {
