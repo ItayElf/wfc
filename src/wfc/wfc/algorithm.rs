@@ -2,6 +2,16 @@ use std::collections::HashSet;
 
 type WfcVector = Vec<HashSet<String>>;
 
+/// Returns wether the vector is collapsed
+pub fn is_collapsed(wfc_vector: &WfcVector) -> bool {
+    for set in wfc_vector {
+        if set.len() != 1 {
+            return false;
+        }
+    }
+    true
+}
+
 /// Converts a WfcVector to a vector of strings.
 pub fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static str> {
     let mut result = Vec::<String>::new();
@@ -18,7 +28,23 @@ pub fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static
 
 #[cfg(test)]
 mod tests {
+    use crate::wfc::wfc::algorithm::is_collapsed;
+
     use super::{flatten_wfc_vector, WfcVector};
+
+    #[test]
+    fn test_is_collapsed_sanity() {
+        let mut vector: WfcVector = vec![
+            vec![String::from("hello")].into_iter().collect(),
+            vec![String::from("world")].into_iter().collect(),
+        ];
+
+        assert_eq!(is_collapsed(&vector), true);
+
+        vector[0].insert(String::new());
+
+        assert_eq!(is_collapsed(&vector), false);
+    }
 
     #[test]
     fn test_flatten_wfc_vector_sanity() {
