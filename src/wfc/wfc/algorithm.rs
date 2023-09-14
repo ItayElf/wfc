@@ -2,7 +2,29 @@ use std::collections::HashSet;
 
 use rand::seq::SliceRandom;
 
+use super::allowed::Rules;
+
 type WfcVector = Vec<HashSet<String>>;
+
+static PLACEHOLDER: String = String::new();
+static START: &str = "\x02";
+static END: &str = "\x03";
+
+/// Returns the left index (before)
+fn get_left_neighbor(index: usize) -> Option<usize> {
+    if index > 0 {
+        return Some(index - 1);
+    }
+    None
+}
+
+/// Returns the right index (after)
+fn get_right_neighbor(index: usize, max_length: usize) -> Option<usize> {
+    if index < (max_length - 1) {
+        return Some(index + 1);
+    }
+    None
+}
 
 /// Returns valid neighbor indexes
 fn get_valid_neighbors(index: usize, max_length: usize) -> impl Iterator<Item = usize> {
@@ -10,7 +32,7 @@ fn get_valid_neighbors(index: usize, max_length: usize) -> impl Iterator<Item = 
     if index > 0 {
         result.push(index - 1);
     }
-    if (index < max_length - 1) {
+    if index < (max_length - 1) {
         result.push(index + 1);
     }
     result.into_iter()
@@ -46,6 +68,45 @@ fn collapse_at(wfc_vector: &mut WfcVector, index: usize) -> Result<String, &'sta
     Ok(value)
 }
 
+/// Returns a set with the possible values based on neighbors
+fn get_valid_options_from_neighbors(
+    wfc_vector: &WfcVector,
+    rules: &Rules,
+    index: usize,
+) -> HashSet<String> {
+    let mut result = wfc_vector[index].clone();
+    let before = get_left_neighbor(index);
+    let after = get_right_neighbor(index, wfc_vector.len());
+
+    if before.is_some() {
+        let before = before.unwrap();
+        let set = &wfc_vector[before];
+        let mut sum = HashSet::<String>::new();
+        for word in set {
+            let after_rules = &rules[word].after;
+            sum.extend(after_rules.iter().map(|s| s.to_string()));
+        }
+        result = result.intersection(&sum).map(|s| s.to_string()).collect();
+    }
+
+    if after.is_some() {
+        let after = after.unwrap();
+        let set = &wfc_vector[after];
+        let mut sum = HashSet::<String>::new();
+        for word in set {
+            let before_rules = &rules[word].before;
+            sum.extend(before_rules.iter().map(|s| s.to_string()));
+        }
+        result = result.intersection(&sum).map(|s| s.to_string()).collect();
+    }
+
+    if result.is_empty() {
+        result.insert(PLACEHOLDER.clone());
+    }
+
+    result
+}
+
 /// Converts a WfcVector to a vector of strings.
 fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static str> {
     let mut result = Vec::<String>::new();
@@ -60,11 +121,97 @@ fn flatten_wfc_vector(wfc_vector: WfcVector) -> Result<Vec<String>, &'static str
     Ok(result)
 }
 
+/// Limits the possible values based on the last collapsed value
+fn propagate(wfc_vector: &mut WfcVector, rules: &Rules, last_collapse_index: usize) {
+    let mut stack = Vec::<usize>::new();
+    let mut current_index = Some(last_collapse_index);
+
+    while current_index.is_some() {
+        let unwrapped_current_index = current_index.unwrap();
+        let neighbors = get_valid_neighbors(unwrapped_current_index, wfc_vector.len());
+
+        for neighbor_index in neighbors {
+            let set = &wfc_vector[neighbor_index];
+            let new_set = get_valid_options_from_neighbors(wfc_vector, rules, neighbor_index);
+            let new_set = new_set.iter().map(|s| s.to_string()).collect();
+
+            if !stack.contains(&neighbor_index) & (*set != new_set) {
+                stack.push(neighbor_index);
+            }
+
+            wfc_vector[neighbor_index] = new_set;
+        }
+
+        current_index = stack.pop();
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::wfc::wfc::algorithm::{collapse_at, get_valid_neighbors, is_collapsed};
+    use std::collections::HashMap;
 
-    use super::{flatten_wfc_vector, WfcVector};
+    use crate::wfc::wfc::{
+        algorithm::{collapse_at, get_valid_neighbors, is_collapsed, PLACEHOLDER},
+        allowed::{Allowed, Rules},
+    };
+
+    use super::{
+        flatten_wfc_vector, get_valid_options_from_neighbors, propagate, WfcVector, END, START,
+    };
+
+    fn get_rules() -> Rules {
+        let mut rules = HashMap::<String, Allowed>::new();
+        rules.insert(
+            START.to_string(),
+            Allowed::new(
+                [END.to_string()].into_iter().collect(),
+                ["hello".to_string()].into_iter().collect(),
+            ),
+        );
+        rules.insert(
+            "hello".to_string(),
+            Allowed::new(
+                [START.to_string()].into_iter().collect(),
+                ["world".to_string(), "there".to_string()]
+                    .into_iter()
+                    .collect(),
+            ),
+        );
+
+        rules.insert(
+            "world".to_string(),
+            Allowed::new(
+                ["hello".to_string()].into_iter().collect(),
+                ["!".to_string()].into_iter().collect(),
+            ),
+        );
+
+        rules.insert(
+            "there".to_string(),
+            Allowed::new(
+                ["hello".to_string()].into_iter().collect(),
+                [END.to_string()].into_iter().collect(),
+            ),
+        );
+
+        rules.insert(
+            "!".to_string(),
+            Allowed::new(
+                ["world".to_string()].into_iter().collect(),
+                [END.to_string()].into_iter().collect(),
+            ),
+        );
+
+        rules.insert(
+            END.to_string(),
+            Allowed::new(
+                ["there".to_string()].into_iter().collect(),
+                [START.to_string()].into_iter().collect(),
+            ),
+        );
+
+        rules
+    }
 
     #[test]
     fn test_get_valid_neighbors_sanity() {
@@ -159,5 +306,64 @@ mod tests {
 
         let result = flatten_wfc_vector(vector);
         assert_eq!(result, Err("Set has more than one string!"))
+    }
+
+    #[test]
+    fn test_get_valid_options_from_neighbors_sanity() {
+        let rules = get_rules();
+        let vector: WfcVector = vec![
+            vec![String::from("hello")].into_iter().collect(),
+            rules.keys().cloned().into_iter().collect(),
+            vec![String::from("!"), String::from(END)]
+                .into_iter()
+                .collect(),
+        ];
+        let result = get_valid_options_from_neighbors(&vector, &rules, 1);
+
+        assert_eq!(result.len(), 2);
+        assert!(result.contains(&String::from("world")));
+        assert!(result.contains(&String::from("there")));
+    }
+
+    #[test]
+    fn test_get_valid_options_from_neighbors_impossible() {
+        let rules = get_rules();
+        let vector: WfcVector = vec![
+            vec![String::from("!")].into_iter().collect(),
+            rules.keys().cloned().into_iter().collect(),
+            vec![String::from(END)].into_iter().collect(),
+        ];
+        let result = get_valid_options_from_neighbors(&vector, &rules, 1);
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result.into_iter().next().unwrap(), PLACEHOLDER);
+    }
+
+    #[test]
+    fn test_propagate_sanity() {
+        let rules = get_rules();
+        let mut vector: WfcVector = vec![
+            vec![String::from(START)].into_iter().collect(),
+            vec![String::from("hello")].into_iter().collect(),
+            rules.keys().cloned().into_iter().collect(),
+            vec![String::from("!"), String::from(END)]
+                .into_iter()
+                .collect(),
+        ];
+        propagate(&mut vector, &rules, 1);
+
+        assert_eq!(
+            vector,
+            vec![
+                vec![String::from(START)].into_iter().collect(),
+                vec![String::from("hello")].into_iter().collect(),
+                vec![String::from("world"), String::from("there")]
+                    .into_iter()
+                    .collect(),
+                vec![String::from("!"), String::from(END)]
+                    .into_iter()
+                    .collect(),
+            ]
+        );
     }
 }
