@@ -232,8 +232,8 @@ mod tests {
     #[test]
     fn test_is_collapsed_sanity() {
         let mut vector: WfcVector = vec![
-            vec![String::from("hello")].into_iter().collect(),
-            vec![String::from("world")].into_iter().collect(),
+            vec!["hello".to_string()].into_iter().collect(),
+            vec!["world".to_string()].into_iter().collect(),
         ];
 
         assert_eq!(is_collapsed(&vector), true);
@@ -246,14 +246,10 @@ mod tests {
     #[test]
     fn test_collapse_at_sanity() {
         let mut vector: WfcVector = vec![
-            vec![
-                String::from("hello"),
-                String::from("world"),
-                String::from("test"),
-            ]
-            .into_iter()
-            .collect(),
-            vec![String::from("world")].into_iter().collect(),
+            vec!["hello".to_string(), "world".to_string(), "test".to_string()]
+                .into_iter()
+                .collect(),
+            vec!["world".to_string()].into_iter().collect(),
         ];
         assert_ne!(vector[0].len(), 1);
 
@@ -283,10 +279,10 @@ mod tests {
     #[test]
     fn test_flatten_wfc_vector_sanity() {
         let vector: WfcVector = vec![
-            vec![String::from("hello")].into_iter().collect(),
-            vec![String::from("world")].into_iter().collect(),
+            vec!["hello".to_string()].into_iter().collect(),
+            vec!["world".to_string()].into_iter().collect(),
         ];
-        let result: Vec<String> = vec![String::from("hello"), String::from("world")];
+        let result: Vec<String> = vec!["hello".to_string(), "world".to_string()];
 
         assert_eq!(flatten_wfc_vector(vector), Ok(result))
     }
@@ -294,14 +290,10 @@ mod tests {
     #[test]
     fn test_flatten_wfc_vector_error() {
         let vector: WfcVector = vec![
-            vec![
-                String::from("hello"),
-                String::from("world"),
-                String::from("test"),
-            ]
-            .into_iter()
-            .collect(),
-            vec![String::from("world")].into_iter().collect(),
+            vec!["hello".to_string(), "world".to_string(), "test".to_string()]
+                .into_iter()
+                .collect(),
+            vec!["world".to_string()].into_iter().collect(),
         ];
 
         let result = flatten_wfc_vector(vector);
@@ -312,26 +304,24 @@ mod tests {
     fn test_get_valid_options_from_neighbors_sanity() {
         let rules = get_rules();
         let vector: WfcVector = vec![
-            vec![String::from("hello")].into_iter().collect(),
+            vec!["hello".to_string()].into_iter().collect(),
             rules.keys().cloned().into_iter().collect(),
-            vec![String::from("!"), String::from(END)]
-                .into_iter()
-                .collect(),
+            vec!["!".to_string(), END.to_string()].into_iter().collect(),
         ];
         let result = get_valid_options_from_neighbors(&vector, &rules, 1);
 
         assert_eq!(result.len(), 2);
-        assert!(result.contains(&String::from("world")));
-        assert!(result.contains(&String::from("there")));
+        assert!(result.contains(&"world".to_string()));
+        assert!(result.contains(&"there".to_string()));
     }
 
     #[test]
     fn test_get_valid_options_from_neighbors_impossible() {
         let rules = get_rules();
         let vector: WfcVector = vec![
-            vec![String::from("!")].into_iter().collect(),
+            vec!["!".to_string()].into_iter().collect(),
             rules.keys().cloned().into_iter().collect(),
-            vec![String::from(END)].into_iter().collect(),
+            vec![END.to_string()].into_iter().collect(),
         ];
         let result = get_valid_options_from_neighbors(&vector, &rules, 1);
 
@@ -343,26 +333,22 @@ mod tests {
     fn test_propagate_sanity() {
         let rules = get_rules();
         let mut vector: WfcVector = vec![
-            vec![String::from(START)].into_iter().collect(),
-            vec![String::from("hello")].into_iter().collect(),
+            vec![START.to_string()].into_iter().collect(),
+            vec!["hello".to_string()].into_iter().collect(),
             rules.keys().cloned().into_iter().collect(),
-            vec![String::from("!"), String::from(END)]
-                .into_iter()
-                .collect(),
+            vec!["!".to_string(), END.to_string()].into_iter().collect(),
         ];
         propagate(&mut vector, &rules, 1);
 
         assert_eq!(
             vector,
             vec![
-                vec![String::from(START)].into_iter().collect(),
-                vec![String::from("hello")].into_iter().collect(),
-                vec![String::from("world"), String::from("there")]
+                vec![START.to_string()].into_iter().collect(),
+                vec!["hello".to_string()].into_iter().collect(),
+                vec!["world".to_string(), "there".to_string()]
                     .into_iter()
                     .collect(),
-                vec![String::from("!"), String::from(END)]
-                    .into_iter()
-                    .collect(),
+                vec!["!".to_string(), END.to_string()].into_iter().collect(),
             ]
         );
     }
