@@ -8,18 +8,18 @@ static PLACEHOLDER: String = String::new();
 
 /// Returns the left index (before)
 fn get_left_neighbor(index: usize) -> Option<usize> {
-    if index > 0 {
-        return Some(index - 1);
+    match index > 0{
+        true => Some(index - 1),
+        false => None
     }
-    None
 }
 
 /// Returns the right index (after)
 fn get_right_neighbor(index: usize, max_length: usize) -> Option<usize> {
-    if index < (max_length - 1) {
-        return Some(index + 1);
+    match index <  (max_length - 1) {
+        true => Some(index + 1),
+        false => None
     }
-    None
 }
 
 /// Returns valid neighbor indexes
