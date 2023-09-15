@@ -48,6 +48,24 @@ fn is_collapsed(wfc_vector: &WfcVector) -> bool {
     true
 }
 
+/// Returns the next index to collapse, usually the one with the least number of words
+fn get_next_index(wfc_vector: &WfcVector) -> Option<usize> {
+    let mut minimum_length = std::usize::MAX;
+    let mut minimum_indexes = Vec::<usize>::new();
+
+    for (i, set) in wfc_vector.iter().enumerate() {
+        if set.len() < minimum_length && set.len() > 1 {
+            minimum_length = set.len();
+            minimum_indexes.clear();
+        }
+        if set.len() == minimum_length {
+            minimum_indexes.push(i);
+        }
+    }
+
+    minimum_indexes.choose(&mut rand::thread_rng()).map(|n| *n)
+}
+
 /// Collapse the set at the given location, returning the value
 fn collapse_at(wfc_vector: &mut WfcVector, index: usize) -> Result<String, &'static str> {
     if index >= wfc_vector.len() {
@@ -144,6 +162,21 @@ fn propagate(wfc_vector: &mut WfcVector, rules: &Rules, last_collapse_index: usi
 
         current_index = stack.pop();
     }
+}
+
+/// Iterates over the vector and propagate it until it is collapsed, returning the collapsed vector
+pub fn iterate(mut wfc_vector: WfcVector, rules: &Rules) -> Result<Vec<String>, &'static str> {
+    while !is_collapsed(&wfc_vector) {
+        let index = get_next_index(&wfc_vector);
+        if index.is_none() {
+            return Err("No index was valid during iteration");
+        }
+        let index = index.unwrap();
+        collapse_at(&mut wfc_vector, index)?;
+        propagate(&mut wfc_vector, rules, index);
+    }
+
+    flatten_wfc_vector(wfc_vector)
 }
 
 #[cfg(test)]
