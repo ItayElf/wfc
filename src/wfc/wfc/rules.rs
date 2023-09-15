@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    vec,
-};
+use std::collections::{HashMap, HashSet};
 
 /// A type representing the rules by which the algorithm works (A map of word to its allowed words).
 pub type Rules = HashMap<String, Allowed>;
@@ -10,9 +7,11 @@ pub type Rules = HashMap<String, Allowed>;
 pub type WfcVector = Vec<HashSet<String>>;
 
 /// Represents start of line
-pub static START: &str = "\x02";
+// pub static START: &str = "\x02";
+pub static START: &str = "^";
 /// Represents end of line
-pub static END: &str = "\x03";
+// pub static END: &str = "\x03";
+pub static END: &str = "$";
 
 /// This struct holds the set of words which are allowed to appear after and before a given word.
 #[derive(Clone)]
@@ -94,7 +93,7 @@ mod tests {
         rules.insert(
             END.to_string(),
             Allowed::new(
-                ["there".to_string()].into_iter().collect(),
+                ["there".to_string(), "!".to_string()].into_iter().collect(),
                 [START.to_string()].into_iter().collect(),
             ),
         );

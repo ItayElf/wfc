@@ -2,24 +2,24 @@ use std::collections::HashSet;
 
 use rand::seq::SliceRandom;
 
-use super::rules::{Rules, WfcVector, END, START};
+use super::rules::{Rules, WfcVector};
 
 static PLACEHOLDER: String = String::new();
 use std::usize::MAX as USIZE_MAX_VALUE;
 
 /// Returns the left index (before)
 fn get_left_neighbor(index: usize) -> Option<usize> {
-    match index > 0{
+    match index > 0 {
         true => Some(index - 1),
-        false => None
+        false => None,
     }
 }
 
 /// Returns the right index (after)
 fn get_right_neighbor(index: usize, max_length: usize) -> Option<usize> {
-    match index <  (max_length - 1) {
+    match index < (max_length - 1) {
         true => Some(index + 1),
-        false => None
+        false => None,
     }
 }
 
@@ -93,12 +93,23 @@ fn get_valid_options_from_neighbors(
     let before = get_left_neighbor(index);
     let after = get_right_neighbor(index, wfc_vector.len());
 
+    let all_keys = rules
+        .keys()
+        .into_iter()
+        .cloned()
+        .collect::<HashSet<String>>();
+
     if before.is_some() {
         let before = before.unwrap();
-        let set = &wfc_vector[before];
+        let set = &(wfc_vector[before]);
+
         let mut sum = HashSet::<String>::new();
         for word in set {
-            let after_rules = &rules[word].after;
+            let after_rules = match word.is_empty() {
+                true => &all_keys,
+                false => &(rules[word].after),
+            };
+
             sum.extend(after_rules.iter().map(|s| s.to_string()));
         }
         result = result.intersection(&sum).map(|s| s.to_string()).collect();
@@ -106,10 +117,14 @@ fn get_valid_options_from_neighbors(
 
     if after.is_some() {
         let after = after.unwrap();
-        let set = &wfc_vector[after];
+        let set = &(wfc_vector[after]);
         let mut sum = HashSet::<String>::new();
         for word in set {
-            let before_rules = &rules[word].before;
+            let before_rules = match word.is_empty() {
+                true => &all_keys,
+                false => &(rules[word].before),
+            };
+
             sum.extend(before_rules.iter().map(|s| s.to_string()));
         }
         result = result.intersection(&sum).map(|s| s.to_string()).collect();
@@ -163,6 +178,11 @@ fn propagate(wfc_vector: &mut WfcVector, rules: &Rules, last_collapse_index: usi
 
 /// Iterates over the vector and propagate it until it is collapsed, returning the collapsed vector
 pub fn iterate(mut wfc_vector: WfcVector, rules: &Rules) -> Result<Vec<String>, &'static str> {
+    // Propagate the start and end
+    let length = wfc_vector.len();
+    propagate(&mut wfc_vector, rules, 0);
+    propagate(&mut wfc_vector, rules, length - 1);
+
     while !is_collapsed(&wfc_vector) {
         let index = get_next_index(&wfc_vector);
         if index.is_none() {
@@ -182,12 +202,10 @@ mod tests {
 
     use crate::wfc::wfc::{
         algorithm::{collapse_at, get_valid_neighbors, is_collapsed, PLACEHOLDER},
-        rules::{Allowed, Rules},
+        rules::{Allowed, Rules, END, START},
     };
 
-    use super::{
-        flatten_wfc_vector, get_valid_options_from_neighbors, propagate, WfcVector, END, START,
-    };
+    use super::{flatten_wfc_vector, get_valid_options_from_neighbors, propagate, WfcVector};
 
     fn get_rules() -> Rules {
         let mut rules = HashMap::<String, Allowed>::new();
@@ -235,7 +253,7 @@ mod tests {
         rules.insert(
             END.to_string(),
             Allowed::new(
-                ["there".to_string()].into_iter().collect(),
+                ["there".to_string(), "!".to_string()].into_iter().collect(),
                 [START.to_string()].into_iter().collect(),
             ),
         );
