@@ -2,13 +2,9 @@ use std::collections::HashSet;
 
 use rand::seq::SliceRandom;
 
-use super::allowed::Rules;
-
-type WfcVector = Vec<HashSet<String>>;
+use super::rules::{Rules, WfcVector, END, START};
 
 static PLACEHOLDER: String = String::new();
-static START: &str = "\x02";
-static END: &str = "\x03";
 
 /// Returns the left index (before)
 fn get_left_neighbor(index: usize) -> Option<usize> {
@@ -185,7 +181,7 @@ mod tests {
 
     use crate::wfc::wfc::{
         algorithm::{collapse_at, get_valid_neighbors, is_collapsed, PLACEHOLDER},
-        allowed::{Allowed, Rules},
+        rules::{Allowed, Rules},
     };
 
     use super::{

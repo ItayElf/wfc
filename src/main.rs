@@ -1,7 +1,7 @@
 mod wfc {
     pub mod wfc {
         pub mod algorithm;
-        pub mod allowed;
+        pub mod rules;
     }
 }
 
