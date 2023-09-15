@@ -5,6 +5,7 @@ use rand::seq::SliceRandom;
 use super::rules::{Rules, WfcVector, END, START};
 
 static PLACEHOLDER: String = String::new();
+use std::usize::MAX as USIZE_MAX_VALUE;
 
 /// Returns the left index (before)
 fn get_left_neighbor(index: usize) -> Option<usize> {
@@ -46,7 +47,7 @@ fn is_collapsed(wfc_vector: &WfcVector) -> bool {
 
 /// Returns the next index to collapse, usually the one with the least number of words
 fn get_next_index(wfc_vector: &WfcVector) -> Option<usize> {
-    let mut minimum_length = std::usize::MAX;
+    let mut minimum_length = USIZE_MAX_VALUE;
     let mut minimum_indexes = Vec::<usize>::new();
 
     for (i, set) in wfc_vector.iter().enumerate() {
