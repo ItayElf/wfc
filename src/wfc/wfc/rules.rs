@@ -7,11 +7,9 @@ pub type Rules = HashMap<String, Allowed>;
 pub type WfcVector = Vec<HashSet<String>>;
 
 /// Represents start of line
-// pub static START: &str = "\x02";
-pub static START: &str = "^";
+pub static START: &str = "\x02";
 /// Represents end of line
-// pub static END: &str = "\x03";
-pub static END: &str = "$";
+pub static END: &str = "\x03";
 
 /// This struct holds the set of words which are allowed to appear after and before a given word.
 #[derive(Clone)]
