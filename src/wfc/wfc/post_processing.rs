@@ -12,6 +12,18 @@ pub static AFTER_TOKENS: &[char] = &[
     END.as_bytes()[0] as char,
 ];
 
+/// Replaces any occurrences of the given char twice in a row with the char once (removes double spaces for example)
+fn remove_double_char(mut string: String, char: char) -> String {
+    let double: String = [char, char].into_iter().collect();
+    let char_str = char.to_string();
+
+    while string.contains(&double) {
+        string = string.replace(&double, &char_str);
+    }
+
+    string
+}
+
 /// Merges the vector into a single string
 pub fn merge(vector: Vec<String>) -> String {
     let mut result = vector.join(" ");
@@ -29,6 +41,11 @@ pub fn merge(vector: Vec<String>) -> String {
     result = result.replace(START, "");
     result = result.replace(END, "\n");
 
+    // Removes double new lines
+    result = remove_double_char(result, '\n');
+    // Removes double spaces
+    result = remove_double_char(result, ' ');
+
     result
 }
 
@@ -38,6 +55,16 @@ mod tests {
         post_processing::merge,
         rules::{END, START},
     };
+
+    use super::remove_double_char;
+
+    #[test]
+    fn test_remove_double_char_sanity() {
+        let string = "hello          there".to_string();
+        let result = remove_double_char(string, ' ');
+
+        assert_eq!(result, "hello there".to_string());
+    }
 
     #[test]
     fn test_merge_sanity() {
