@@ -4,6 +4,9 @@ mod wfc {
         pub mod post_processing;
         pub mod rules;
     }
+    mod parsing {
+        pub mod json_parse;
+    }
 }
 
 use std::collections::HashMap;

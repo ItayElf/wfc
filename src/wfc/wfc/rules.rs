@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 /// A type representing the rules by which the algorithm works (A map of word to its allowed words).
@@ -12,7 +13,7 @@ pub static START: &str = "\x02";
 pub static END: &str = "\x03";
 
 /// This struct holds the set of words which are allowed to appear after and before a given word.
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Allowed {
     pub before: HashSet<String>,
     pub after: HashSet<String>,
