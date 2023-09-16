@@ -24,19 +24,26 @@ fn remove_double_char(mut string: String, char: char) -> String {
     string
 }
 
-/// Merges the vector into a single string
-pub fn merge(vector: Vec<String>) -> String {
-    let mut result = vector.join(" ");
-
+/// Fixes the location of the tokens in the string
+fn fix_tokens(mut string: String) -> String {
     for token in BEFORE_TOKENS {
         let before_string = format!("{} ", &token.to_string().as_str());
-        result = result.replace(&before_string, &token.to_string().as_str());
+        string = string.replace(&before_string, &token.to_string().as_str());
     }
 
     for token in AFTER_TOKENS {
         let after_string = format!(" {}", &token.to_string().as_str());
-        result = result.replace(&after_string, &token.to_string().as_str());
+        string = string.replace(&after_string, &token.to_string().as_str());
     }
+
+    string
+}
+
+/// Merges the vector into a single string
+pub fn merge(vector: Vec<String>) -> String {
+    let mut result = vector.join(" ");
+
+    result = fix_tokens(result);
 
     result = result.replace(START, "");
     result = result.replace(END, "\n");
