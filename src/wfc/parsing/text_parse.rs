@@ -7,6 +7,7 @@ use super::post_processing::{remove_double_char, AFTER_TOKENS, BEFORE_TOKENS};
 
 /// Returns the given text as an array of tokens
 fn parse_text(mut text: String) -> Vec<String> {
+    text = text.to_lowercase();
     if text.ends_with('\n') {
         text.pop();
     }
@@ -65,6 +66,12 @@ fn convert_tokens_to_rules(tokens: &Vec<String>) -> Rules {
     rules
 }
 
+/// Generates rules from an existing text
+pub fn generate_rules(text: String) -> Rules {
+    let tokens = parse_text(text);
+    convert_tokens_to_rules(&tokens)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::wfc::{
@@ -76,7 +83,7 @@ mod tests {
 
     #[test]
     fn test_parse_text_sanity() {
-        let text = "hello there nice to meet you\n".to_string();
+        let text = "Hello there nice to meet you\n".to_string();
         assert_eq!(
             parse_text(text),
             [START, "hello", "there", "nice", "to", "meet", "you", END]
@@ -88,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_parse_text_tokens() {
-        let text = "hello there, nice to meet (you)!\n".to_string();
+        let text = "Hello there, Nice to meet (you)!\n".to_string();
         assert_eq!(
             parse_text(text),
             [START, "hello", "there", ",", "nice", "to", "meet", "(", "you", ")", "!", END]

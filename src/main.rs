@@ -10,73 +10,16 @@ mod wfc {
     }
 }
 
-use std::collections::HashMap;
-
 use wfc::{
-    parsing::post_processing::merge,
-    wfc::{
-        algorithm::iterate,
-        rules::{generate_wfc_vector, Allowed, Rules, END, START},
-    },
+    parsing::{post_processing::merge, text_parse::generate_rules},
+    wfc::{algorithm::iterate, rules::generate_wfc_vector},
 };
 
-fn get_rules() -> Rules {
-    let mut rules = HashMap::<String, Allowed>::new();
-    rules.insert(
-        START.to_string(),
-        Allowed::new(
-            [END.to_string()].into_iter().collect(),
-            ["hello".to_string()].into_iter().collect(),
-        ),
-    );
-    rules.insert(
-        "hello".to_string(),
-        Allowed::new(
-            [START.to_string()].into_iter().collect(),
-            ["world".to_string(), "there".to_string()]
-                .into_iter()
-                .collect(),
-        ),
-    );
-
-    rules.insert(
-        "world".to_string(),
-        Allowed::new(
-            ["hello".to_string()].into_iter().collect(),
-            ["!".to_string()].into_iter().collect(),
-        ),
-    );
-
-    rules.insert(
-        "there".to_string(),
-        Allowed::new(
-            ["hello".to_string()].into_iter().collect(),
-            [END.to_string()].into_iter().collect(),
-        ),
-    );
-
-    rules.insert(
-        "!".to_string(),
-        Allowed::new(
-            ["world".to_string()].into_iter().collect(),
-            [END.to_string()].into_iter().collect(),
-        ),
-    );
-
-    rules.insert(
-        END.to_string(),
-        Allowed::new(
-            ["there".to_string(), "!".to_string()].into_iter().collect(),
-            [START.to_string()].into_iter().collect(),
-        ),
-    );
-
-    rules
-}
+static A_FAIRY_SONG_SHAKESPEARE: &str = "Over hill, over dale,\nThorough bush, thorough brier,\nOver park, over pale,\nThorough flood, thorough fire!\nI do wander everywhere,\nSwifter than the moon's sphere;\nAnd I serve the Fairy Queen,\nTo dew her orbs upon the green;\nThe cowslips tall her pensioners be;\nIn their gold coats spots you see;\nThose be rubies, fairy favours;\nIn those freckles live their savours;\nI must go seek some dewdrops here,\nAnd hang a pearl in every cowslip's ear.";
 
 fn main() {
-    let rules = get_rules();
-    let vector = generate_wfc_vector(&rules, 3);
+    let rules = generate_rules(A_FAIRY_SONG_SHAKESPEARE.to_string());
+    let vector = generate_wfc_vector(&rules, 20);
 
     let result = iterate(vector, &rules);
 

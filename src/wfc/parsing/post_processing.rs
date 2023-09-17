@@ -8,6 +8,7 @@ pub static AFTER_TOKENS: &[char] = &[
     ',',
     ':',
     ')',
+    ';',
     START.as_bytes()[0] as char,
     END.as_bytes()[0] as char,
 ];
