@@ -8,7 +8,7 @@ static PLACEHOLDER: String = String::new();
 use std::usize::MAX as USIZE_MAX_VALUE;
 
 /// Returns the left index (before)
-fn get_left_neighbor(index: usize) -> Option<usize> {
+pub fn get_left_neighbor(index: usize) -> Option<usize> {
     match index > 0 {
         true => Some(index - 1),
         false => None,
@@ -16,7 +16,7 @@ fn get_left_neighbor(index: usize) -> Option<usize> {
 }
 
 /// Returns the right index (after)
-fn get_right_neighbor(index: usize, max_length: usize) -> Option<usize> {
+pub fn get_right_neighbor(index: usize, max_length: usize) -> Option<usize> {
     match index < (max_length - 1) {
         true => Some(index + 1),
         false => None,

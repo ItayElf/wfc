@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-/// A type representing the rules by which the algorithm works (A map of word to its allowed words).
+/// A type representing the rules by which the algorithm works (A map of word to its allowed words)
 pub type Rules = HashMap<String, Allowed>;
 
 /// A type for the vector the algorithm work on
@@ -12,7 +12,7 @@ pub static START: &str = "\x02";
 /// Represents end of line
 pub static END: &str = "\x03";
 
-/// This struct holds the set of words which are allowed to appear after and before a given word.
+/// This struct holds the set of words which are allowed to appear after and before a given word
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Allowed {
     pub before: HashSet<String>,
@@ -20,9 +20,17 @@ pub struct Allowed {
 }
 
 impl Allowed {
-    /// Creates a new allowed struct.
+    /// Creates a new allowed struct
     pub const fn new(before: HashSet<String>, after: HashSet<String>) -> Self {
         Self { before, after }
+    }
+
+    /// Creates a new empty allowed struct
+    pub fn empty() -> Self {
+        Self {
+            before: HashSet::<String>::new(),
+            after: HashSet::<String>::new(),
+        }
     }
 }
 
