@@ -7,9 +7,9 @@ pub type Rules = HashMap<String, Allowed>;
 /// A type for the vector the algorithm work on
 pub type WfcVector = Vec<HashSet<String>>;
 
-/// Represents start of line
+/// Represents start of text
 pub static START: &str = "\x02";
-/// Represents end of line
+/// Represents end of text
 pub static END: &str = "\x03";
 
 /// This struct holds the set of words which are allowed to appear after and before a given word
