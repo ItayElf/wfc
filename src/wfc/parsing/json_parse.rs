@@ -1,12 +1,12 @@
 use crate::wfc::wfc::rules::Rules;
 
 /// Parses a json string as a rules type type
-fn parse_rules_json(json_string: &str) -> Result<Rules, serde_json::Error> {
+pub fn parse_rules_json(json_string: &str) -> Result<Rules, serde_json::Error> {
     serde_json::from_str(json_string)
 }
 
 /// Returns a string object of the serialized rules
-fn rules_to_json(rules: &Rules) -> Result<String, serde_json::Error> {
+pub fn rules_to_json(rules: &Rules) -> Result<String, serde_json::Error> {
     serde_json::to_string(rules)
 }
 

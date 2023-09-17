@@ -1,22 +1,24 @@
 mod wfc {
     pub mod wfc {
         pub mod algorithm;
-        pub mod post_processing;
         pub mod rules;
     }
-    mod parsing {
+    pub mod parsing {
         pub mod json_parse;
+        pub mod post_processing;
+        pub mod text_parse;
     }
 }
 
 use std::collections::HashMap;
 
-use wfc::wfc::{
-    algorithm::iterate,
-    rules::{generate_wfc_vector, Allowed, Rules, END, START},
+use wfc::{
+    parsing::post_processing::merge,
+    wfc::{
+        algorithm::iterate,
+        rules::{generate_wfc_vector, Allowed, Rules, END, START},
+    },
 };
-
-use crate::wfc::wfc::post_processing::merge;
 
 fn get_rules() -> Rules {
     let mut rules = HashMap::<String, Allowed>::new();

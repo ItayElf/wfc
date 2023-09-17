@@ -1,4 +1,4 @@
-use super::rules::{END, START};
+use crate::wfc::wfc::rules::{END, START};
 
 pub static BEFORE_TOKENS: &[char] = &['(', START.as_bytes()[0] as char, END.as_bytes()[0] as char];
 pub static AFTER_TOKENS: &[char] = &[
@@ -13,7 +13,7 @@ pub static AFTER_TOKENS: &[char] = &[
 ];
 
 /// Replaces any occurrences of the given char twice in a row with the char once (removes double spaces for example)
-fn remove_double_char(mut string: String, char: char) -> String {
+pub fn remove_double_char(mut string: String, char: char) -> String {
     let double: String = [char, char].into_iter().collect();
     let char_str = char.to_string();
 
@@ -58,9 +58,9 @@ pub fn merge(vector: Vec<String>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::wfc::wfc::{
-        post_processing::merge,
-        rules::{END, START},
+    use crate::wfc::{
+        parsing::post_processing::merge,
+        wfc::rules::{END, START},
     };
 
     use super::remove_double_char;
