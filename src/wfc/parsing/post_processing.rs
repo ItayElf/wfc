@@ -1,6 +1,6 @@
 use crate::wfc::wfc::rules::{END, START};
 
-pub static BEFORE_TOKENS: &[char] = &['(', START.as_bytes()[0] as char, END.as_bytes()[0] as char];
+pub static BEFORE_TOKENS: &[char] = &['(', '\n', START.as_bytes()[0] as char];
 pub static AFTER_TOKENS: &[char] = &[
     '.',
     '!',
@@ -9,7 +9,7 @@ pub static AFTER_TOKENS: &[char] = &[
     ':',
     ')',
     ';',
-    START.as_bytes()[0] as char,
+    '\n',
     END.as_bytes()[0] as char,
 ];
 
@@ -117,8 +117,7 @@ mod tests {
             "hello".to_string(),
             "world".to_string(),
             "!".to_string(),
-            END.to_string(),
-            START.to_string(),
+            "\n".to_string(),
             "is".to_string(),
             "this".to_string(),
             "(".to_string(),

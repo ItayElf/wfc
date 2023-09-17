@@ -22,12 +22,8 @@ fn parse_text(mut text: String) -> Vec<String> {
         text = text.replace(&token.to_string().as_str(), &after_string);
     }
 
-    text = text.replace("\n", " \n ");
-    text = text.replace("\n", &(END.to_owned() + " " + START));
-    text = format!("{START} {text} {END}");
-
     text = remove_double_char(text, ' ');
-    text = remove_double_char(text, '\n');
+    text = format!("{START} {text} {END}");
 
     text.split(" ").map(|s| s.to_string()).collect()
 }
@@ -110,13 +106,10 @@ mod tests {
         let text = "hello there\nnice to meet (you)!".to_string();
         assert_eq!(
             parse_text(text),
-            [
-                START, "hello", "there", END, START, "nice", "to", "meet", "(", "you", ")", "!",
-                END
-            ]
-            .map(|s| s.to_string())
-            .into_iter()
-            .collect::<Vec<_>>()
+            [START, "hello", "there", "\n", "nice", "to", "meet", "(", "you", ")", "!", END]
+                .map(|s| s.to_string())
+                .into_iter()
+                .collect::<Vec<_>>()
         )
     }
 
@@ -146,22 +139,21 @@ mod tests {
 
     #[test]
     fn test_convert_tokens_to_rules_multiple() {
-        let vector = [START, "hello", "there", END, START, "hello", "world", END]
+        let vector = [START, "hello", "there", "\n", "hello", "world", END]
             .map(|s| s.to_string())
             .into_iter()
             .collect::<Vec<_>>();
 
         let rules = convert_tokens_to_rules(&vector);
 
-        assert_eq!(rules.keys().len(), 5);
+        assert_eq!(rules.keys().len(), 6);
         assert!(rules.contains_key(END));
         assert!(rules.contains_key(START));
         assert!(rules.contains_key("hello"));
         assert!(rules.contains_key("there"));
         assert!(rules.contains_key("world"));
+        assert!(rules.contains_key("\n"));
         assert!(rules["hello"].after.contains("there"));
         assert!(rules["hello"].after.contains("world"));
-        assert!(rules[END].before.contains("there"));
-        assert!(rules[END].before.contains("world"));
     }
 }
